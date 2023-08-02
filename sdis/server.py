@@ -15,7 +15,7 @@ from PIL import Image, ImageOps
 from tqdm.contrib.concurrent import process_map
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from shis.utils import (chunks, filter_image, find_thumb, rreplace, urlify,
+from sdis.utils import (chunks, filter_image, find_thumb, rreplace, urlify,
                         start_server, scale_dims, fixed_width_formatter)
 
 

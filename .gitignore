@@ -15,4 +15,6 @@ dist/
 .DS_Store
 
 # Dev
-.vscode
+.content
+.vscode/settings.json
+.devcontainer/devcontainer.json

@@ -4,13 +4,13 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="shis",
-    author="Nikhil Verma",
-    author_email="nikhilweee@gmail.com",
-    description="Simple HTTP Image Server",
+    name="sdis",
+    author="Simon Free",
+    author_email="sipefree@gmail.com",
+    description="Stable Diffusion Image Server - Simple HTTP Image Server for Stable Diffusion output",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/nikhilweee/shis/",
+    url="https://github.com/sipefree/stable-diffusion-image-server/",
     packages=setuptools.find_packages(),
     package_data={'shis': ['templates/*', 'templates/*/*']},
     license="MIT",
@@ -20,7 +20,7 @@ setuptools.setup(
     python_requires='>=3.6',
     project_urls={
         'Documentation': 'https://shis.readthedocs.io/',
-        'Source': 'https://github.com/nikhilweee/shis/',
+        'Source': 'https://github.com/sipefree/stable-diffusion-image-server/',
     },
     classifiers=[
         "Programming Language :: Python :: 3.6",
