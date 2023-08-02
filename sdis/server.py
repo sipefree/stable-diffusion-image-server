@@ -16,7 +16,8 @@ from tqdm.contrib.concurrent import process_map
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from sdis.utils import (chunks, filter_image, find_thumb, rreplace, urlify,
-                        start_server, scale_dims, fixed_width_formatter)
+                        start_server, scale_dims, fixed_width_formatter,
+                        read_info_from_image, parse_generation_parameters)
 
 
 def generate_thumbnail(paths: Tuple[str, str, str, str], args: argparse.Namespace):
@@ -219,12 +220,21 @@ def generate_albums(args: argparse.Namespace) -> Tuple[Dict, int]:
                     width, height = imagesize.get(real_path)
                 except ValueError:
                     continue
+                orig_width = width
+                orig_height = height
                 width, height = scale_dims(width, height, args.thumb_size)
                 small = os.path.relpath(small_path, args.thumb_dir)
                 large = os.path.relpath(large_path, args.thumb_dir)
                 full = os.path.relpath(full_path, args.thumb_dir)
+                
+                img = Image.open(real_path)
+                gentext, _ = read_info_from_image(img)
+                genparams = parse_generation_parameters(gentext)
+                
                 thumb = {'name': name, 'small': small, 'large': large,
-                         'full': full, 'width': width, 'height': height}
+                         'full': full, 'width': width, 'height': height,
+                         'orig_width': orig_width, 'orig_height': orig_height,
+                         'genparams': genparams, 'gentext': gentext}
                 thumbs.append(thumb)
             album['thumbs'] = thumbs
             if page > 0:
@@ -233,6 +243,7 @@ def generate_albums(args: argparse.Namespace) -> Tuple[Dict, int]:
             album['pagination'][page]['current'] = 'current'
             album['url'] = album['pagination'][page]['url']
             album['revpath'] = os.path.relpath('.', album['url'])
+            
             yield album, page
 
         # Ensure that empty folders are not skipped

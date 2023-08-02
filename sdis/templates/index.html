@@ -5,10 +5,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, user-scalable=no" />
   <title>{{ album.name }}</title>
-  <link rel="stylesheet" href="{{ album.revpath }}/static/reset.css" />
-  <link rel="stylesheet" href="{{ album.revpath }}/static/lightgallery.css" />
-  <link rel="stylesheet" href="{{ album.revpath }}/static/style.css" />
-  <link rel="icon" type="image/x-icon" href="{{ album.revpath }}/static/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans+Caption:wght@400;700&family=PT+Sans+Narrow:wght@400;700&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0" />
+  <link rel="stylesheet" href="{{ album.revpath }}/static/css/reset.css" />
+  <link rel="stylesheet" href="{{ album.revpath }}/static/css/lightgallery.css" />
+  <link rel="stylesheet" href="{{ album.revpath }}/static/css/style.css" />
+  <link rel="icon" type="image/png" href="{{ album.revpath }}/static/favicon.png" />
 </head>
 
 <body>
@@ -23,12 +27,12 @@
         </button>
         <button class="mode-button" onclick="toggleSelection();">
           Toggle
-          <input class="clipboard-button" type="image" src="{{ album.revpath }}/static/select.svg"
+          <input class="clipboard-button" type="image" src="{{ album.revpath }}/static/images/select.svg"
             title="Toggle selection." />
         </button>
         <button class="mode-button" onclick="copySelection();">
           Copy
-          <input class="clipboard-button" type="image" src="{{ album.revpath }}/static/copy.svg"
+          <input class="clipboard-button" type="image" src="{{ album.revpath }}/static/images/copy.svg"
             title="Copy selected file names to clipboard." />
         </button>
       </div>
@@ -74,13 +78,16 @@
       <li>
         <div class="overlay overlay-left">
           {{ album.start_idx + loop.index }}
+          {% if thumb.orig_width >= 1000 or thumb.orig_height >= 1000 %}
+          <span class="hd-img">HD</span>
+          {% endif %}
         </div>
         <div class="overlay overlay-right">
           <a href="{{ album.revpath }}/{{ thumb.large }}" class="lg-selector" 
-            data-sub-html="{{ thumb.name }}" data-download-url="{{ album.revpath }}/{{ thumb.full }}">
-            <img src="{{ album.revpath }}/static/expand.svg" title="Open in gallery view" /></a>
+            data-sub-html="#caption-{{ album.start_idx + loop.index }}" data-download-url="{{ album.revpath }}/{{ thumb.full }}">
+            <img src="{{ album.revpath }}/static/images/expand.svg" title="Open in gallery view" /></a>
           <a target="_blank" href="{{ album.revpath }}/{{ thumb.full }}">
-            <img src="{{ album.revpath }}/static/external.svg" title="Open in a new tab" /></a>
+            <img src="{{ album.revpath }}/static/images/external.svg" title="Open in a new tab" /></a>
         </div>
         <img src="{{ album.revpath }}/{{ thumb.small }}" loading="eager" width="{{ thumb.width }}"
           height="{{ thumb.height }}">
@@ -88,6 +95,51 @@
       </li>
       {% endfor %}
     </ul>
+
+    <!-- Captions -->
+    <div id="captions">
+      {% for thumb in album.thumbs %}
+      <div id="caption-{{ album.start_idx + loop.index }}">
+        <!-- Title -->
+        <div class="caption-title">{{ thumb.name }}</div>
+
+        <!-- Buttons -->
+        <div class="button-container">
+          <!-- Info Button -->
+          <button class="toggle-btn" data-idx="{{ album.start_idx + loop.index }}">
+            <span class="material-symbols-outlined">info</span>
+          </button>
+
+          <!-- Text Button -->
+          <button class="toggle-btn" data-idx="{{ album.start_idx + loop.index }}">
+            <span class="material-symbols-outlined">sticky_note_2</span>
+          </button>
+        </div>
+
+        <!-- Collapsible Content -->
+        <div class="caption-content-container"> 
+
+          <!-- Generation Info -->
+          <div class="toggle-content info-content-{{ album.start_idx + loop.index }}">
+            <div class="geninfo-container">
+              {% for key, value in thumb.genparams.items() %}
+                <div class="geninfo-element{{ ' geninfo-full-width' if key in ['Prompt', 'Negative prompt'] }}">
+                  <div class="geninfo-key">{{ key }}:</div>
+                  <div class="geninfo-value">{{ value }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Generation Text -->
+          <div class="toggle-content text-content-{{ album.start_idx + loop.index }}">
+            <pre>{{ thumb.gentext }}</pre>
+          </div>
+
+        </div>
+      </div>
+      {% endfor %}
+    </div>
 
     <!-- Bottom Pagination -->
     {% if album.thumbs %}
@@ -104,13 +156,13 @@
     </footer>
   </div>
 
-  <script src="{{ album.revpath }}/static/jquery.min.js"></script>
-  <script src="{{ album.revpath }}/static/lightgallery.js"></script>
-  <script src="{{ album.revpath }}/static/lg-zoom.min.js"></script>
-  <script src="{{ album.revpath }}/static/index.js"></script>
+  <script src="{{ album.revpath }}/static/js/jquery.min.js"></script>
+  <script src="{{ album.revpath }}/static/js/lightgallery.js"></script>
+  <script src="{{ album.revpath }}/static/js/lg-zoom.min.js"></script>
+  <script src="{{ album.revpath }}/static/js/index.js"></script>
   {% if album.selection %}
-  <script src="{{ album.revpath }}/static/selection.js"></script>
-  <script src="{{ album.revpath }}/static/select.js"></script>
+  <script src="{{ album.revpath }}/static/js/selection.js"></script>
+  <script src="{{ album.revpath }}/static/js/select.js"></script>
   {% endif %}
 </body>
 

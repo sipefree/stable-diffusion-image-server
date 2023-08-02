@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Module",
+            "name": "Run Server",
             "type": "python",
             "request": "launch",
             "module": "sdis.server",

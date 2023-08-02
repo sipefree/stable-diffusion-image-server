@@ -6,6 +6,11 @@ from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 from typing import Generator, List, Tuple
+from PIL import Image
+import piexif
+import piexif.helper
+import json
+import re
 
 from tqdm import tqdm
 
@@ -288,3 +293,104 @@ def start_server_38(args):
                f"Press CTRL-C to quit.")
 
     return httpd
+
+
+#-------------------------------------------------------------------------------
+# Image Info Utils
+#-------------------------------------------------------------------------------
+
+SD_IGNORED_INFO_KEYS = {
+    'jfif', 'jfif_version', 'jfif_unit', 'jfif_density', 'dpi', 'exif',
+    'loop', 'background', 'timestamp', 'duration', 'progressive', 'progression',
+    'icc_profile', 'chromaticity', 'photoshop',
+}
+
+def read_info_from_image(image: Image.Image) -> tuple[str | None, dict]:
+    items = (image.info or {}).copy()
+    
+    geninfo = items.pop('parameters', None)
+    
+    if "exif" in items:
+        exif = piexif.load(items["exif"])
+        exif_comment = (exif or {}).get("Exif", {}).get(piexif.ExifIFD.UserComment, b'')
+        try:
+            exif_comment = piexif.helper.UserComment.load(exif_comment)
+        except ValueError:
+            exif_comment = exif_comment.decode('utf8', errors="ignore")
+
+        if exif_comment:
+            items['exif comment'] = exif_comment
+            geninfo = exif_comment
+    
+    for field in SD_IGNORED_INFO_KEYS:
+        items.pop(field, None)
+
+    return geninfo, items
+
+def unquote(text):
+    if len(text) == 0 or text[0] != '"' or text[-1] != '"':
+        return text
+
+    try:
+        return json.loads(text)
+    except Exception:
+        return text
+
+re_param_code = r'\s*([\w ]+):\s*("(?:\\"[^,]|\\"|\\|[^\"])+"|[^,]*)(?:,|$)'
+re_param = re.compile(re_param_code)
+re_imagesize = re.compile(r"^(\d+)x(\d+)$")
+
+def parse_generation_parameters(x: str) -> dict[str, any]:
+    """Parse a string of generation parameters into a dictionary.
+
+    :param x: the string to parse.
+    :return: a dictionary of parsed parameters.
+    """
+    res = {}
+
+    prompt = ""
+    negative_prompt = ""
+
+    done_with_prompt = False
+
+    *lines, lastline = x.strip().split("\n")
+    if len(re_param.findall(lastline)) < 3:
+        lines.append(lastline)
+        lastline = ''
+
+    for line in lines:
+        line = line.strip()
+        if line.startswith("Negative prompt:"):
+            done_with_prompt = True
+            line = line[16:].strip()
+        if done_with_prompt:
+            negative_prompt += ("" if negative_prompt == "" else "\n") + line
+        else:
+            prompt += ("" if prompt == "" else "\n") + line
+            
+    res["Prompt"] = prompt
+    res["Negative prompt"] = negative_prompt
+
+    for k, v in re_param.findall(lastline):
+        try:
+            if v[0] == '"' and v[-1] == '"':
+                v = unquote(v)
+
+            m = re_imagesize.match(v)
+            if m is not None:
+                res[f"{k}-1"] = m.group(1)
+                res[f"{k}-2"] = m.group(2)
+            else:
+                res[k] = v
+        except Exception:
+            print(f"Error parsing \"{k}: {v}\"")
+            
+    # Missing CLIP skip means it was set to 1 (the default)
+    if "Clip skip" not in res:
+        res["Clip skip"] = "1"
+
+    hypernet = res.get("Hypernet", None)
+    if hypernet is not None:
+        res["Prompt"] += f"""<hypernet:{hypernet}:{res.get("Hypernet strength", "1.0")}>"""
+    
+    return res
