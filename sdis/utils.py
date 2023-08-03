@@ -183,6 +183,10 @@ class CustomHTTPHandler(SimpleHTTPRequestHandler):
     """
 
     protocol_version = "HTTP/1.1"
+    
+    def __init__(self, *args, directory: str=os.getcwd(), no_cache_static=False, **kwargs):
+        self.no_cache_static = no_cache_static
+        SimpleHTTPRequestHandler.__init__(self, *args, directory=directory, **kwargs)
 
     def translate_path(self, path: str) -> str:
         """Translates a path to the local filename syntax."""
@@ -195,6 +199,13 @@ class CustomHTTPHandler(SimpleHTTPRequestHandler):
     def log_message(self, format: str, *args: str) -> None:
         """A dummy function overridden to disable logging."""
         pass
+    
+    def end_headers(self) -> None:
+        if self.no_cache_static and re.match('/html/static/.*', self.path):
+            self.send_header('Cache-Control', 'no-cache')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
+        super().end_headers()
     
     def handle(self) -> None:
         """Handle multiple requests if necessary."""
@@ -315,7 +326,7 @@ def start_server_38(args):
                     socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
             return super().server_bind()
 
-    handler_class = partial(CustomHTTPHandler, directory=args.thumb_dir)
+    handler_class = partial(CustomHTTPHandler, directory=args.thumb_dir, no_cache_static=args.no_cache_static)
     server_class = DualStackServer
     server_class.address_family, server_address = \
         _get_best_family(None, args.port or 7447)

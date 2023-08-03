@@ -362,6 +362,18 @@ span.hd-img {
   width: 100%;
 }
 
+.gentext {
+  font-family: 'PT Mono', monospace;
+  font-size: 0.8em;  /* adjust as needed */
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  white-space: pre-wrap;  /* preserves formatting and allows line breaks */
+  word-wrap: break-word;  /* allows long URLs etc. to wrap */
+  padding: 10px;
+  margin: 10px;
+  text-align: left;
+}
+
 
 .sdis-caption-title {
   text-align: center;
@@ -381,7 +393,7 @@ span.hd-img {
   cursor: pointer;
 }
 
-.sdis-toggle-btn-active {
+.sdis-toggle-button-active {
   background: white;
   color: black;
   border-radius: 2px;

@@ -5,11 +5,13 @@ class SDISToggleButtonGroup {
         this.sectionEventHandlers = {};
         for (let sectionName of sectionNames) {
             this.sectionEventHandlers[sectionName] = () => {
-                document.querySelectorAll(".sdis-toggle-content[data-group='" + groupName + "']").forEach((content) => {
-                    content.classList.remove("sdis-toggle-content-active");
+                document.querySelectorAll(".sdis-toggle-content").forEach((content) => {
+                    if (sectionNames.has(content.getAttribute("data-section"))) {
+                        content.classList.remove("sdis-toggle-content-active");
                     
-                    if (content.getAttribute("data-section") === sectionName) {
-                        content.classList.add("sdis-toggle-content-active");
+                        if (content.getAttribute("data-section") === sectionName) {
+                            content.classList.add("sdis-toggle-content-active");
+                        }
                     }
                 });
                 
@@ -73,7 +75,7 @@ class SDISToggleSystem {
     }
 
     configureAllButtons() {
-        for (let groupName in this.buttonGroups) {
+        for (let groupName of Object.keys(this.buttonGroups)) {
             this.buttonGroups[groupName].configureAllButtons();
         }
     }

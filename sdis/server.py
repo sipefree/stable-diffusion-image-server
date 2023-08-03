@@ -333,10 +333,10 @@ def main(args: argparse.Namespace) -> None:
     """
     args = preprocess_args(args)
     initial_template_regen = args.regenerate_templates
+    server = None
     
     # Start the server process
     try:
-        server = start_server(args)
         stale_paths = []
         while True:
             # Generate HTML pages
@@ -354,6 +354,10 @@ def main(args: argparse.Namespace) -> None:
                     "[{elapsed}<{remaining}, {rate_fmt:>10}{postfix}]"))
             stale_paths = paths
             args.quiet = True
+            
+            if server is None:
+                server = start_server(args)
+            
             if not args.watch:
                 break
             else:
@@ -408,7 +412,9 @@ def make_parser() -> argparse.ArgumentParser:
     parser.add_argument('--preview-size', type=int, default=1024, metavar='SIZE',
         help='size of generated previews in pixels (default: %(default)s)')
     parser.add_argument('--regenerate-templates', action='store_true',
-                        help='Regenerate the HTML templates on startup, even if they already exist.')
+                        help='(Debug) Regenerate the HTML templates on startup, even if they already exist.')
+    parser.add_argument('--no-cache-static', action='store_true',
+                        help='(Debug) Do not cache static files (JS/CSS).')
     return parser
 
 
