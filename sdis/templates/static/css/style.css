@@ -326,7 +326,7 @@ span.hd-img {
  * Geninfo 
  */
 
-#captions {
+#sdis-captions {
   display: none;
 }
 
@@ -363,30 +363,35 @@ span.hd-img {
 }
 
 
-.caption-title {
+.sdis-caption-title {
   text-align: center;
   position: relative;
 }
 
-.button-container {
+.sdis-caption-button-container {
   position: absolute;
   top: 0;
   right: 0;
 }
 
-.toggle-btn {
+.sdis-toggle-button {
   background: transparent;
   color: white;
   border: none;
   cursor: pointer;
 }
 
-.toggle-btn.active {
+.sdis-toggle-btn-active {
   background: white;
   color: black;
   border-radius: 2px;
 }
 
-.toggle-content {
+.sdis-toggle-content {
   display: none;
 }
+
+.sdis-toggle-content-active {
+  display: block;
+}
+

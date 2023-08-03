@@ -91,7 +91,7 @@
         </div>
         <div class="overlay overlay-right">
           <a href="{{ album.revpath }}/{{ thumb.large }}" class="lg-selector" 
-            data-sub-html="#caption-{{ album.start_idx + loop.index }}" data-download-url="{{ album.revpath }}/{{ thumb.full }}">
+            data-sub-html="#sdis-caption-{{ album.start_idx + loop.index }}" data-download-url="{{ album.revpath }}/{{ thumb.full }}">
             <img src="{{ album.revpath }}/static/images/expand.svg" title="Open in gallery view" /></a>
           <a target="_blank" href="{{ album.revpath }}/{{ thumb.full }}">
             <img src="{{ album.revpath }}/static/images/external.svg" title="Open in a new tab" /></a>
@@ -104,30 +104,30 @@
     </ul>
 
     <!-- Captions -->
-    <div id="captions">
+    <div id="sdis-captions">
       {% for thumb in album.thumbs %}
-      <div id="caption-{{ album.start_idx + loop.index }}">
+      <div id="sdis-caption-{{ album.start_idx + loop.index }}">
         <!-- Title -->
-        <div class="caption-title">{{ thumb.name }}</div>
+        <div class="sdis-caption-title">{{ thumb.name }}</div>
 
         <!-- Buttons -->
-        <div class="button-container">
+        <div class="sdis-caption-button-container">
           <!-- Info Button -->
-          <button class="toggle-btn" data-idx="{{ album.start_idx + loop.index }}">
+          <button class="sdis-toggle-button" data-section="sdis-caption-info" data-group="sdis-caption-buttons">
             <span class="material-symbols-outlined">info</span>
           </button>
 
           <!-- Text Button -->
-          <button class="toggle-btn" data-idx="{{ album.start_idx + loop.index }}">
+          <button class="sdis-toggle-button" data-section="sdis-caption-text" data-group="sdis-caption-buttons">
             <span class="material-symbols-outlined">sticky_note_2</span>
           </button>
         </div>
 
         <!-- Collapsible Content -->
-        <div class="caption-content-container"> 
+        <div class="sdis-caption-content-container"> 
 
           <!-- Generation Info -->
-          <div class="toggle-content info-content-{{ album.start_idx + loop.index }}">
+          <div class="sdis-toggle-content" data-section="sdis-caption-info">
             <div class="geninfo-container">
               {% for key, value in thumb.genparams.items() %}
                 <div class="geninfo-element{{ ' geninfo-full-width' if key in ['Prompt', 'Negative prompt'] }}">
@@ -139,7 +139,7 @@
           </div>
 
           <!-- Generation Text -->
-          <div class="toggle-content text-content-{{ album.start_idx + loop.index }}">
+          <div class="sdis-toggle-content" data-section="sdis-caption-text">
             <pre>{{ thumb.gentext }}</pre>
           </div>
 
