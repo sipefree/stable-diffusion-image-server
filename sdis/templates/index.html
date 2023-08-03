@@ -52,6 +52,13 @@
       {% for subalbum in album.albums %}
       <a href="{{ album.revpath }}/{{ subalbum.url }}"
         style="background-image: url('{{ album.revpath }}/{{ subalbum.image }}')">
+        {% if 'special_symbol' in subalbum %}
+          <div class="special-symbol" style="background-color: {{ subalbum.special_symbol.color }};">
+            <span class="material-symbols-outlined">
+              {{ subalbum.special_symbol.symbol }}
+            </span>
+          </div>
+          {% endif %}
         <div class="info">
           <h3>{{ subalbum.name }}</h3>
           <div class="summary">{{ subalbum.size }} items</div>

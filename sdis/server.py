@@ -17,7 +17,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from sdis.utils import (chunks, filter_image, find_thumb, rreplace, urlify,
                         start_server, scale_dims, fixed_width_formatter,
-                        read_info_from_image, parse_generation_parameters)
+                        read_info_from_image, parse_generation_parameters,
+                        album_sort_key, album_special_symbol)
 
 
 def generate_thumbnail(paths: Tuple[str, str, str, str], args: argparse.Namespace):
@@ -171,7 +172,7 @@ def generate_albums(args: argparse.Namespace) -> Tuple[Dict, int]:
         # Sort
         if args.order == 'name':
             files = sorted(files)
-            folders = sorted(folders)
+            folders = sorted(folders, key=album_sort_key)
         if args.order == 'random':
             random.shuffle(files)
             random.shuffle(folders)
@@ -190,6 +191,11 @@ def generate_albums(args: argparse.Namespace) -> Tuple[Dict, int]:
             url = urlify(album_slug_path)
             folder = {'image': image, 'url': url,
                       'name': folder_name, 'size': album_size}
+            
+            special_symbol = album_special_symbol(folder_name)
+            if special_symbol != None:
+                folder['special_symbol'] = special_symbol
+            
             albums.append(folder)
         album['albums'] = albums
 
@@ -326,6 +332,8 @@ def main(args: argparse.Namespace) -> None:
     :param args: command line arguments parsed by argparse.
     """
     args = preprocess_args(args)
+    initial_template_regen = args.regenerate_templates
+    
     # Start the server process
     try:
         server = start_server(args)
@@ -334,8 +342,9 @@ def main(args: argparse.Namespace) -> None:
             # Generate HTML pages
             paths, num_pages, stale = process_paths(args)
             new_paths = list(set(paths) - set(stale_paths))
-            if new_paths or stale:
+            if new_paths or stale or initial_template_regen:
                 create_templates(args, num_pages)
+                initial_template_regen = False
             # Generate thumbnails
             if paths:
                 process_map(generate_thumbnail, paths, repeat(args),
@@ -398,6 +407,8 @@ def make_parser() -> argparse.ArgumentParser:
         help='size of generated thumbnails in pixels (default: %(default)s)')
     parser.add_argument('--preview-size', type=int, default=1024, metavar='SIZE',
         help='size of generated previews in pixels (default: %(default)s)')
+    parser.add_argument('--regenerate-templates', action='store_true',
+                        help='Regenerate the HTML templates on startup, even if they already exist.')
     return parser
 
 

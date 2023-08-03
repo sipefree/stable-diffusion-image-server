@@ -112,6 +112,42 @@ def scale_dims(width: int, height: int, min_val: int) -> Tuple[int, int]:
     return round(width), round(height)
 
 
+def album_sort_key(name: str) -> tuple[int, str]:
+    special_keys = ['txt2img-images', 'img2img-images', 'txt2img-grids', 'img2img-grids', 'extras-images', 'init-images']
+    if name in special_keys:
+        return (0, special_keys.index(name))
+    else:
+        return (1, name)
+
+def album_special_symbol(name: str) -> dict[str, str] | None:
+    return {
+        'txt2img-images': {
+            'symbol': 'text_fields\u200Aarrow_right_alt\u200Aimage',
+            'color': '#1E88E5AA'
+        },
+        'img2img-images': {
+            'symbol': 'image\u200Aarrow_right_alt\u200Aimage',
+            'color': '#00ACC1AA'
+        },
+        'txt2img-grids': {
+            'symbol': 'text_fields\u200Aarrow_right_alt\u200Acalendar_view_month',
+            'color': '#29B6F6AA'
+        },
+        'img2img-grids': {
+            'symbol': 'image\u200Aarrow_right_alt\u200Acalendar_view_month',
+            'color': '#4DD0E1AA'
+        },
+        'extras-images': {
+            'symbol': 'resize',
+            'color': '#5C6BC0AA'
+        },
+        'init-images': {
+            'symbol': 'add_a_photo',
+            'color': '#7E57C2AA'
+        },
+    }.get(name, None)
+
+
 #-------------------------------------------------------------------------------
 # Argparse Utils
 #-------------------------------------------------------------------------------

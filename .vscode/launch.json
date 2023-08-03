@@ -5,7 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Server",
+            "name": "Debug Server",
+            "type": "python",
+            "request": "launch",
+            "module": "sdis.server",
+            "args": [
+                "-p", "7862",
+                "-w", "10",
+                "--ncpus", "4",
+                "--thumb-dir", "/thumbs/out",
+                "-d", "/shis-content",
+                "--regenerate-templates"
+            ],
+            "justMyCode": true
+        },
+        {
+            "name": "Clean + Debug Server",
             "type": "python",
             "request": "launch",
             "module": "sdis.server",
