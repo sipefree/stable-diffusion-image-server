@@ -10,7 +10,7 @@
 	},
 	"features": {},
 	"mounts": [
-		"source=${CONTENT_DIRECTORY_GOES_HERE},target=/shis-content,type=bind,consistency=cached"
+		"source=${CONTENT_DIRECTORY_GOES_HERE},target=/sdis-content,type=bind,consistency=cached"
 	],
 	"forwardPorts": [7862],
 	"remoteUser": "root",

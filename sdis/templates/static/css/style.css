@@ -326,8 +326,18 @@ span.hd-img {
  * Geninfo 
  */
 
+.lg-sub-html {
+  padding: 0 !important;
+}
+
 #sdis-captions {
   display: none;
+}
+
+.sdis-caption-content-container {
+  background: rgba(0, 0, 0, 0.3);
+  padding-left: 60px;
+  padding-right: 60px;
 }
 
 .geninfo-container {
@@ -365,8 +375,8 @@ span.hd-img {
 .gentext {
   font-family: 'PT Mono', monospace;
   font-size: 0.8em;  /* adjust as needed */
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   white-space: pre-wrap;  /* preserves formatting and allows line breaks */
   word-wrap: break-word;  /* allows long URLs etc. to wrap */
   padding: 10px;
@@ -437,7 +447,11 @@ span.hd-img {
 }
 
 .sdis-copy-button-copied {
-  background: greenyellow;
-  color: green;
+  background-color: greenyellow;
+  color: black;
   border-radius: 2px;
+}
+
+.sdis-copy-button-fade {
+  transition: background-color 1s, color 1s;
 }

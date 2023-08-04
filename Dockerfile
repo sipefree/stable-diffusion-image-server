@@ -8,11 +8,11 @@ ENV NCPUS 4
 ENV CLEAN false
 
 # Create directories for shis content and thumbnails
-RUN mkdir /shis-content
+RUN mkdir /sdis-content
 RUN mkdir /thumbs
 
 # Define volumes
-VOLUME /shis-content
+VOLUME /sdis-content
 VOLUME /thumbs
 
 # Set the working directory to /app
@@ -25,4 +25,4 @@ COPY . /app
 RUN python3 -m pip install .
 
 # Run the command to start the server with environment variables
-CMD python3 -m sdis.server -p ${PORT} -w ${WATCH_DELAY} --ncpus ${NCPUS} --thumb-dir /thumbs -d /shis-content $(if ${CLEAN}; then echo '--clean'; fi)
+CMD python3 -m sdis.server -p ${PORT} -w ${WATCH_DELAY} --ncpus ${NCPUS} --thumb-dir /thumbs -d /sdis-content $(if ${CLEAN}; then echo '--clean'; fi)

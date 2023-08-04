@@ -294,7 +294,7 @@ def create_templates(args: argparse.Namespace, num_pages: int) -> None:
         bar_format=("{l_bar}{bar:20}| {n_fmt:>5}/{total_fmt:>5} "
         "[{elapsed}<{remaining}, {rate_fmt:>10}{postfix}]")) as pbar:
         for album, page in generate_albums(args):
-            template = env.get_template('index.html')
+            template = env.get_template('index.html.j2')
             url = album['pagination'][page]['url']
             html = f'{args.thumb_dir}/{url}/index.html'
             html_dir = os.path.dirname(html)

@@ -4,11 +4,11 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:alpine-3.18
 RUN apk add --no-cache python3 py3-pip git jpeg-dev
 
 # Create directories for shis content and thumbnails
-RUN mkdir /shis-content
+RUN mkdir /sdis-content
 RUN mkdir /thumbs
 
 # Define volumes
-VOLUME /shis-content
+VOLUME /sdis-content
 VOLUME /thumbs
 
 RUN mkdir /tmp/pip-requirements
