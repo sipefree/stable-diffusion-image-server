@@ -162,7 +162,18 @@ $(document).ready(function () {
         preload: 5,
         selector: '.lg-selector',
         allowMediaOverlap: true,
-        defaultCaptionHeight: 30
+        defaultCaptionHeight: 30,
+        mobileSettings: {
+            toogleThumb: false,
+            backdropDuration: 0,
+            slideEndAnimation: false,
+            startClass: '',
+            zoom: true,
+            preload: 5,
+            selector: '.lg-selector',
+            allowMediaOverlap: true,
+            defaultCaptionHeight: 30
+        }
     });
     
     sdisToggleSystem.discoverButtonGroups();

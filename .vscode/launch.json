@@ -20,7 +20,7 @@
                 "--thumb-dir",
                 "/thumbs/out",
                 "-d",
-                "/shis-content",
+                "/sdis-content",
                 "--no-cache-static",
                 "--regenerate-templates"
             ],
@@ -47,7 +47,7 @@
                 "--thumb-dir",
                 "/thumbs/out",
                 "-d",
-                "/shis-content",
+                "/sdis-content",
                 "--no-cache-static",
                 "--clean"
             ],
