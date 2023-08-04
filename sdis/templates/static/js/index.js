@@ -4,12 +4,14 @@ class SDISToggleButtonGroup {
         this.sectionNames = sectionNames;
         this.sectionEventHandlers = {};
         for (let sectionName of sectionNames) {
-            this.sectionEventHandlers[sectionName] = () => {
+            this.sectionEventHandlers[sectionName] = (event) => {
+                let shouldEnable = !event.currentTarget.classList.contains("sdis-toggle-button-active");
+
                 document.querySelectorAll(".sdis-toggle-content").forEach((content) => {
                     if (sectionNames.has(content.getAttribute("data-section"))) {
                         content.classList.remove("sdis-toggle-content-active");
                     
-                        if (content.getAttribute("data-section") === sectionName) {
+                        if (shouldEnable && content.getAttribute("data-section") === sectionName) {
                             content.classList.add("sdis-toggle-content-active");
                         }
                     }
@@ -18,7 +20,7 @@ class SDISToggleButtonGroup {
                 document.querySelectorAll(".sdis-toggle-button[data-group='" + groupName + "']").forEach((btn) => {
                     btn.classList.remove("sdis-toggle-button-active");
     
-                    if (btn.getAttribute("data-section") === sectionName) {
+                    if (shouldEnable && btn.getAttribute("data-section") === sectionName) {
                         btn.classList.add("sdis-toggle-button-active");
                     }
                 });
@@ -82,7 +84,58 @@ class SDISToggleSystem {
 }
 
 
+class SDISCopyButtonSystem {
+
+    constructor() {
+        this.copyTextsByID = {};
+        this.eventHandlersById = {};
+    }
+
+    discoverCopyTexts() {
+        document.querySelectorAll(".sdis-copy-text").forEach((copyTextElement) => {
+            let id = copyText.getAttribute("data-id");
+            if (id === null) {
+                throw new Error("Copy text has no data-id attribute");
+            }
+
+            let copyText = copyTextElement.innerText
+
+            this.copyTextsByID[id] = copyText;
+            this.eventHandlersById[id] = (event) => {
+                let copyButton = event.currentTarget;
+                let copyText = this.copyTextsByID[id];
+                navigator.clipboard.writeText(copyText);
+                copyButton.classList.add("sdis-copy-button-copied");
+                setTimeout(() => {
+                    copyButton.classList.remove("sdis-copy-button-copied");
+                }, 1000);
+            };
+        });
+
+        this.configureAllButtons();
+    }
+
+
+    configureAllButtons() {
+        document.querySelectorAll(".sdis-copy-button").forEach((copyButton) => {
+            let id = copyButton.getAttribute("data-id");
+            if (id === null) {
+                throw new Error("Copy button has no data-id attribute");
+            }
+
+            if (!(id in this.copyTextsByID)) {
+                throw new Error("Copy button with data-id " + id + " has no corresponding copy text");
+            }
+
+            copyButton.removeEventListener("click", this.eventHandlersById[id]);
+            copyButton.addEventListener("click", this.eventHandlersById[id]);
+        });
+    }
+
+}
+
 var sdisToggleSystem = new SDISToggleSystem();
+var sdisCopySystem = new SDISCopyButtonSystem();
 
 // Initialize LightGallery
 $(document).ready(function () {
@@ -101,9 +154,11 @@ $(document).ready(function () {
     });
     
     sdisToggleSystem.discoverButtonGroups();
+    sdisCopySystem.discoverCopyTexts();
 
     media.addEventListener('lgAfterAppendSubHtml', function(event) {
         sdisToggleSystem.configureAllButtons();
+        sdisCopySystem.configureAllButtons();
     });
     
 });

@@ -186,6 +186,8 @@ class CustomHTTPHandler(SimpleHTTPRequestHandler):
     
     def __init__(self, *args, directory: str=os.getcwd(), no_cache_static=False, **kwargs):
         self.no_cache_static = no_cache_static
+        self.static_path_prefix = os.path.join(directory, 'static')
+        self.debug_path_prefix = os.path.join(os.getcwd(), 'sdis', 'templates', 'static')
         SimpleHTTPRequestHandler.__init__(self, *args, directory=directory, **kwargs)
 
     def translate_path(self, path: str) -> str:
@@ -194,6 +196,10 @@ class CustomHTTPHandler(SimpleHTTPRequestHandler):
         if hasattr(self.server, 'directory'):
             relpath = os.path.relpath(path, os.getcwd())
             path = os.path.join(self.server.directory, relpath)
+        
+        if self.no_cache_static and path.startswith(self.static_path_prefix):
+            path = path.replace(self.static_path_prefix, self.debug_path_prefix)
+        
         return path
     
     def log_message(self, format: str, *args: str) -> None:
@@ -201,7 +207,7 @@ class CustomHTTPHandler(SimpleHTTPRequestHandler):
         pass
     
     def end_headers(self) -> None:
-        if self.no_cache_static and re.match('/html/static/.*', self.path):
+        if self.no_cache_static and re.match('/static/.*', self.path):
             self.send_header('Cache-Control', 'no-cache')
             self.send_header('Pragma', 'no-cache')
             self.send_header('Expires', '0')

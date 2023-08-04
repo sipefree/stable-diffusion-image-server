@@ -378,25 +378,54 @@ span.hd-img {
 .sdis-caption-title {
   text-align: center;
   position: relative;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-.sdis-caption-button-container {
+.sdis-caption-button-container-left {
   position: absolute;
-  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.sdis-caption-button-container-right {
+  position: absolute;
+  bottom: 0;
   right: 0;
 }
 
-.sdis-toggle-button {
+.sdis-caption-button {
   background: transparent;
   color: white;
   border: none;
   cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.sdis-caption-button:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sdis-caption-button:active {
+  transform: scale(0.9);
+}
+
+.sdis-caption-button-container-left .sdis-caption-button  {
+  margin-left: 20px;
+}
+
+.sdis-caption-button-container-right .sdis-caption-button  {
+  margin-right: 20px;
 }
 
 .sdis-toggle-button-active {
   background: white;
   color: black;
   border-radius: 2px;
+}
+
+.sdis-toggle-button-active:hover {
+  color: rgba(0, 0, 0, 0.85);
 }
 
 .sdis-toggle-content {
@@ -407,3 +436,8 @@ span.hd-img {
   display: block;
 }
 
+.sdis-copy-button-copied {
+  background: greenyellow;
+  color: green;
+  border-radius: 2px;
+}
