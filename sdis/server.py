@@ -233,14 +233,16 @@ def generate_albums(args: argparse.Namespace) -> Tuple[Dict, int]:
                 large = os.path.relpath(large_path, args.thumb_dir)
                 full = os.path.relpath(full_path, args.thumb_dir)
                 
-                img = Image.open(real_path)
-                gentext, _ = read_info_from_image(img)
-                
-                if gentext == None:
+                try:
+                    img = Image.open(real_path)
+                    gentext, _ = read_info_from_image(img)
+                    if gentext == None:
+                        raise ValueError()
+                    genparams = parse_generation_parameters(gentext)
+                except:
                     gentext = "(No params found)"
                     genparams = { 'Note': gentext }
-                else:
-                    genparams = parse_generation_parameters(gentext)
+                        
                 
                 thumb = {'name': name, 'small': small, 'large': large,
                          'full': full, 'width': width, 'height': height,
