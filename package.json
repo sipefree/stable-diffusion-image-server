@@ -1,0 +1,12 @@
+{
+  "name": "stable-diffusion-image-server",
+  "version": "1.0.0",
+  "description": "Stable Diffusion Image Server is a Python library designed to serve directories of images produced by the Stable Diffusion ML image generation software. It's a fork of the Simple HTTP Image Server project ([shis](https://github.com/nikhilweee/shis)), and we're thankful to the original author for their work. The primary addition in this fork is the capability to extract PNG EXIF data embedded in the images which contain the image diffusion prompt and configuration information and display them in the HTML.",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
