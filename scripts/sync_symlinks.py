@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import os
 import sys
@@ -30,6 +32,7 @@ async def watch_dirs_apply(dir_paths: list[Path], fn: Callable[[Path], None]) ->
         
         # Add watches for each directory path and store in the dictionary
         for dir_path in dir_paths:
+            print(f"+ Adding watch for: {dir_path}")
             watch = inotify.add_watch(dir_path, mask)
             watches[watch] = dir_path
         
@@ -77,20 +80,23 @@ def buffer_fn(fn: Callable[[Path], None]) -> Callable[[Path], None]:
     buffer_timers: dict[Path, asyncio.TimerHandle] = {}
 
     async def buffered_call(path: Path):
-        # Cancel the existing timer if it exists
-        if path in buffer_timers:
-            buffer_timers[path].cancel()
-
         # Wait for 1 second (or desired debounce time)
+        print(f"  (Debouncing for 1 second: {path})")
         await asyncio.sleep(1)
         
         # Call the original function
+        print(f"- Syncing after filesystem events: {path}")
         fn(path)
 
         # Remove the path from the buffer_timers dict
         buffer_timers.pop(path, None)
 
     def wrapper(path: Path) -> None:
+        # Cancel the existing timer if it exists
+        if path in buffer_timers:
+            print(f"  (Canceling existing timer for: {path})")
+            buffer_timers[path].cancel()
+            
         # Start the buffered call as a task and store its timer
         buffer_timers[path] = asyncio.ensure_future(buffered_call(path))
 
@@ -128,6 +134,8 @@ def do_sync_links(src_files: dict[str, Path], dst_dir: Path):
         print(f"Destination directory does not exist: {dst_dir}")
         sys.exit(1)
         
+    src_files = {k: relative_path_from_to(v, dst_dir) for k, v in src_files.items()}
+        
     existing_symlinks = set()  # Existing, correct symlinks
     for file_name in dst_dir.iterdir():
         if file_name.is_symlink():
@@ -141,8 +149,22 @@ def do_sync_links(src_files: dict[str, Path], dst_dir: Path):
     for file_name, src_path in src_files.items():
         if file_name not in existing_symlinks:
             dst_path = dst_dir / file_name
-            print(f"Creating new symlink: {dst_path}")
+            print(f"Creating new symlink: {dst_path} -> {src_path}")
             dst_path.symlink_to(src_path)
+
+def relative_path_from_to(src: Path, dst: Path) -> Path:
+    """
+    Get a relative path to go from dst to src.
+    """
+    src_parts = src.resolve().parts
+    dst_parts = dst.resolve().parts
+
+    # Find common ancestor
+    common_length = len(os.path.commonprefix([src_parts, dst_parts]))
+    to_common = ['..'] * (len(dst_parts) - common_length)
+
+    # Return relative path
+    return Path(*to_common, *src_parts[common_length:])
 
 def get_src_files(src_dir: Path) -> dict[str, Path]:
     """

@@ -7,7 +7,8 @@ docs/build/
 
 # Setuptools
 build/
-dist/
+/dist/
+/frontend/dist/*
 .eggs/
 *.egg-info/
 

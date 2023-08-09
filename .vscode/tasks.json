@@ -1,0 +1,27 @@
+{
+    "tasks": [
+        {
+            "label": "tailwind-build",
+            "type": "npm",
+            "script": "tailwind-build",
+            "path": "frontend",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "tailwind-watch (dev)",
+            "type": "npm",
+            "script": "tailwind-watch",
+            "path": "frontend",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "frontend-sync (dev)",
+            "type": "shell",
+            "command": "scripts/sync_frontend_symlinks.sh",
+            "isBackground": true,
+            "problemMatcher": []
+        }
+    ]
+}

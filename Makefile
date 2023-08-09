@@ -32,5 +32,5 @@ build: install-poetry install-frontend sync-assets build-frontend build-sdis
 
 # Clean build artifacts
 clean:
-	cd frontend && rm -rf dist node_modules
+	cd frontend && rm -rf dist/* node_modules
 	rm -rf dist

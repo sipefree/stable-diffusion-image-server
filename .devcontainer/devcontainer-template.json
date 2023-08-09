@@ -14,6 +14,7 @@
 	],
 	"forwardPorts": [7862],
 	"remoteUser": "root",
+	"onCreateCommand": "mv /workspace/frontend/node_modules ${containerWorkspaceFolder}/frontend/",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -24,8 +25,13 @@
 				"ms-python.python",
 				"ms-python.vscode-pylance",
 				"wholroyd.jinja",
-				"bradlc.vscode-tailwindcss"
-			]
+				"bradlc.vscode-tailwindcss",
+				"ms-vscode.makefile-tools"
+			],
+			"settings": {
+				"terminal.integrated.profiles.linux": { "zsh": { "path": "/usr/bin/zsh" } },
+				"terminal.integrated.defaultProfile.linux": "zsh"
+			}
 		}
 	}
 
