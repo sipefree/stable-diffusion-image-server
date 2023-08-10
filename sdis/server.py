@@ -8,6 +8,7 @@ import time
 from itertools import repeat
 from multiprocessing import cpu_count
 from typing import Dict, Tuple
+from importlib import resources
 
 import imagesize
 from tqdm import tqdm
@@ -279,8 +280,9 @@ def create_templates(args: argparse.Namespace, num_pages: int) -> None:
     :param num_pages: number of HTML files (pages) to create.
     """
     # Copy JS/CSS
-    template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-    static_src = os.path.join(template_dir, 'static')
+    frontend_dir = resources.files('frontend')
+    template_dir = frontend_dir / 'templates'
+    static_src = frontend_dir / 'dist'
     static_dest = os.path.join(args.thumb_dir, 'static')
     html_dir = os.path.join(args.thumb_dir, 'html')
     # Remove existing directories

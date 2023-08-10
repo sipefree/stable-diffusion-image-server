@@ -17,8 +17,6 @@ build/
 
 # Dev
 .content
-.vscode/settings.json
-.devcontainer/devcontainer.json
 
 # Node
 node_modules/

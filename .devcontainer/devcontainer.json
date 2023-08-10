@@ -9,12 +9,13 @@
 		"dockerfile": "Dockerfile"
 	},
 	"features": {},
+	"initializeCommand": "sh ${localWorkspaceFolder}/.devcontainer/init-host.sh",
 	"mounts": [
-		"source=${CONTENT_DIRECTORY_GOES_HERE},target=/sdis-content,type=bind,consistency=cached"
+		"source=devvolume-sdis-content,target=/sdis-content,type=volume"
 	],
 	"forwardPorts": [7862],
 	"remoteUser": "root",
-	"onCreateCommand": "mv /workspace/frontend/node_modules ${containerWorkspaceFolder}/frontend/",
+	"onCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh ${containerWorkspaceFolder}",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -26,11 +27,13 @@
 				"ms-python.vscode-pylance",
 				"wholroyd.jinja",
 				"bradlc.vscode-tailwindcss",
-				"ms-vscode.makefile-tools"
+				"ms-vscode.makefile-tools",
+				"tamasfe.even-better-toml"
 			],
 			"settings": {
-				"terminal.integrated.profiles.linux": { "zsh": { "path": "/usr/bin/zsh" } },
-				"terminal.integrated.defaultProfile.linux": "zsh"
+				"terminal.integrated.profiles.linux": { "zsh": { "path": "/bin/zsh" } },
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
 			}
 		}
 	}

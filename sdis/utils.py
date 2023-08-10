@@ -11,6 +11,7 @@ import piexif
 import piexif.helper
 import json
 import re
+from importlib import resources
 
 from tqdm import tqdm
 
@@ -187,7 +188,7 @@ class CustomHTTPHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, directory: str=os.getcwd(), no_cache_static=False, **kwargs):
         self.no_cache_static = no_cache_static
         self.static_path_prefix = os.path.join(directory, 'static')
-        self.debug_path_prefix = os.path.join(os.getcwd(), 'sdis', 'templates', 'static')
+        self.debug_path_prefix = str(resources.files("frontend") / "dist")
         SimpleHTTPRequestHandler.__init__(self, *args, directory=directory, **kwargs)
 
     def translate_path(self, path: str) -> str:
