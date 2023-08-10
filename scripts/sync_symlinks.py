@@ -10,7 +10,7 @@ from pathlib import Path
 from pathlib import Path
 from asyncinotify import Inotify, Mask
 import asyncio
-from typing import Callable
+from typing import Callable, Optional
 
 async def watch_dirs_apply(dir_paths: list[Path], fn: Callable[[Path], None]) -> None:
     """
@@ -68,8 +68,9 @@ def watch_dirs_apply_forever(dir_paths: list[Path], fn: Callable[[Path], None]) 
 def buffer_fn(fn: Callable[[Path], None]) -> Callable[[Path], None]:
     """
     Returns a function that debounces and buffers calls to the provided function.
-    The returned function will wait for 1 second after the first call before calling
-    the provided function. Any calls made during that 1 second will be ignored.
+    The returned function will wait for 1 second after the last call before calling
+    the provided function. All paths collected during that 1 second will be passed
+    to the provided function in a loop.
 
     Parameters:
         fn: A function that accepts a single Path argument.
@@ -77,30 +78,38 @@ def buffer_fn(fn: Callable[[Path], None]) -> Callable[[Path], None]:
     Returns:
         A function that accepts a single Path argument.
     """
-    buffer_timers: dict[Path, asyncio.TimerHandle] = {}
+    buffered_paths: set[Path] = set()
+    timer: Optional[asyncio.TimerHandle] = None
 
-    async def buffered_call(path: Path):
-        # Wait for 1 second (or desired debounce time)
-        print(f"  (Debouncing for 1 second: {path})")
+    async def trigger_buffered_calls():
         await asyncio.sleep(1)
         
-        # Call the original function
-        print(f"- Syncing after filesystem events: {path}")
-        fn(path)
-
-        # Remove the path from the buffer_timers dict
-        buffer_timers.pop(path, None)
+        print("Beginning frontend sync.")
+        
+        for path in buffered_paths:
+            print(f"- Syncing after filesystem events: {path}")
+            fn(path)
+        
+        print("Done syncing frontend.")
+        
+        # Clear the buffered paths
+        buffered_paths.clear()
 
     def wrapper(path: Path) -> None:
+        nonlocal timer
+        
+        # Add the path to the buffered paths
+        buffered_paths.add(path)
+        
         # Cancel the existing timer if it exists
-        if path in buffer_timers:
-            print(f"  (Canceling existing timer for: {path})")
-            buffer_timers[path].cancel()
+        if timer:
+            timer.cancel()
             
-        # Start the buffered call as a task and store its timer
-        buffer_timers[path] = asyncio.ensure_future(buffered_call(path))
+        # Start the trigger function as a task after 1 second
+        timer = asyncio.ensure_future(trigger_buffered_calls())
 
     return wrapper
+
 
 def sync_symlinks(src_dir: Path, dst_dir: Path):
     """
@@ -248,10 +257,14 @@ def main():
 
         src_dirs.append(src_path)
         dst_dirs[src] = dst_path
+        
+    print("Beginning frontend sync.")
 
     # Perform the initial sync
     for src in src_dirs:
         sync_symlinks(src, dst_dirs[str(src)])
+        
+    print("Done syncing frontend.")
 
     # If --watch is used, watch the directories
     if args.watch:

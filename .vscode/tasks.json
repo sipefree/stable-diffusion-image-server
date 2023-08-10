@@ -1,11 +1,30 @@
+// For more information see: https://code.visualstudio.com/docs/editor/tasks
+// Note: This file is only used in development, not in production
+
+// This file contains tasks for building the frontend assets in development mode.
+// It is only used in development, not in production.
+// For production, see the Makefile in the root of the project.
+
+// To run a task, open the Command Palette (Ctrl+Shift+P) and type "Run Task".
+// Then select the task you want to run. You can also bind a key to a task in
+// your keybindings.json file (see https://code.visualstudio.com/docs/getstarted/keybindings).
 {
+    "version": "2.0.0",
     "tasks": [
         {
-            "label": "tailwind-build",
-            "type": "npm",
-            "script": "tailwind-build",
-            "path": "frontend",
-            "group": "build",
+            "label": "clean",
+            "type": "shell",
+            "command": "make clean",
+            "problemMatcher": []
+        },
+        {
+            "label": "tailwind-watch + frontend-sync (dev)",
+            "isBackground": true,
+            "dependsOn": [
+                "tailwind-watch (dev)",
+                "frontend-sync (dev)"
+            ],
+            "dependsOrder": "parallel",
             "problemMatcher": []
         },
         {
@@ -14,13 +33,65 @@
             "script": "tailwind-watch",
             "path": "frontend",
             "group": "build",
-            "problemMatcher": []
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": "^CssSyntaxError: tailwindcss: (.*):(\\d+):(\\d+): (.+)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "message": 4
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^Rebuilding\\.\\.\\..*",
+                    "endsPattern":"^Done in .*$"
+                },
+            },
+            "dependsOn": [
+                "install frontend"
+            ]
         },
         {
             "label": "frontend-sync (dev)",
             "type": "shell",
             "command": "scripts/sync_frontend_symlinks.sh",
             "isBackground": true,
+            "problemMatcher": {
+                "owner": "custom",
+                "pattern": [
+                    {
+                        "regexp": "^CssSyntaxError: tailwindcss: (.*):(\\d+):(\\d+): (.+)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "message": 4
+                    }
+                ],
+                "background": {
+                    "activeOnStart": false,
+                    "beginsPattern": "^Beginning frontend sync.$",
+                    "endsPattern": "^Done syncing frontend.$"
+                }
+            },
+            "dependsOn": [
+                "install frontend"
+            ]
+        },
+        {
+            "label": "install frontend",
+            "type": "shell",
+            "command": "make install-frontend",
+            "problemMatcher": []
+        },
+        {
+            "label": "tailwind-build",
+            "type": "npm",
+            "script": "tailwind-build",
+            "path": "frontend",
+            "group": "build",
             "problemMatcher": []
         }
     ]

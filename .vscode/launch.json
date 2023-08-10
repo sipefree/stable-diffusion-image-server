@@ -24,13 +24,14 @@
                 "--no-cache-static",
                 "--regenerate-templates"
             ],
-            "justMyCode": true,
+            "justMyCode": false,
             "serverReadyAction": {
                 "pattern": "Serving HTTP on [0-9\\.]+:([0-9]+). Press CTRL-C to quit.",
                 "uriFormat": "http://localhost:%s/html/",
                 "action": "debugWithChrome",
                 "webRoot": "${workspaceFolder}/sdis/templates/"
-              }
+            },
+            //"preLaunchTask": "tailwind-watch + frontend-sync (dev)"
         },
         {
             "name": "Debug Server (Clean Thumbnails)",
@@ -51,7 +52,8 @@
                 "--no-cache-static",
                 "--clean"
             ],
-            "justMyCode": true
+            "justMyCode": false,
+            "preLaunchTask": "tailwind-watch + frontend-sync (dev)"
         },
         {
             "name": "Debug Client Javascript",
@@ -61,11 +63,5 @@
             "webRoot": "${workspaceFolder}/sdis/templates/",
         }
     ],
-    "compounds": [
-        {
-            "name": "Debug Server + Client",
-            "configurations": ["Debug Server", "Debug Client Javascript"],
-            "stopAll": true
-        }
-    ]
+    "compounds": []
 }

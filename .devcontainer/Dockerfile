@@ -17,7 +17,8 @@ WORKDIR /workspace
 # Note: It assumes pyproject.toml and poetry.lock are in the root of your project
 COPY pyproject.toml poetry.lock ./
 RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry config virtualenvs.create false && \
+    poetry config virtualenvs.create true && \
+    poetry config virtualenvs.in-project true && \
     poetry install --no-root
 
 # Install JavaScript dependencies
