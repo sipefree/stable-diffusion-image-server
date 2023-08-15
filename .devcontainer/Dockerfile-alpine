@@ -1,21 +1,17 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.11-bookworm
+FROM mcr.microsoft.com/vscode/devcontainers/base:alpine-3.18
 
-# Update apt
-RUN apt update
+# Install Python 3, pip, git, and jpeg-dev (for Pillow)
+RUN apk add --no-cache python3 py3-pip git jpeg-dev libffi-dev
 
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
 
-# Install Redis etc
-RUN apt install -y redis-server redis-tools redis-redisearch redis-redisearch-doc
+# Install NPM and Node.js
+RUN apk add --no-cache nodejs npm
 
 # Set working directory
 WORKDIR /workspace
-
-# Install node/npm
-COPY .devcontainer/install-node.sh ./
-RUN /bin/bash install-node.sh
 
 # Install Python dependencies using Poetry
 # Note: It assumes pyproject.toml and poetry.lock are in the root of your project

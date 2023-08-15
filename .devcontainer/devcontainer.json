@@ -16,6 +16,7 @@
 	"forwardPorts": [7862],
 	"remoteUser": "root",
 	"onCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh ${containerWorkspaceFolder}",
+	"postStartCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-start.sh ${containerWorkspaceFolder}",
 	"customizations": {
 		"vscode": {
 			"extensions": [
