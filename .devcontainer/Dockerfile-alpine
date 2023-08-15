@@ -30,11 +30,11 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # Create directories for sdis content and thumbnails
 RUN mkdir /sdis-content
-RUN mkdir /thumbs
+RUN mkdir /data
 
 # Define volumes
 VOLUME /sdis-content
-VOLUME /thumbs
+VOLUME /data
 
 # Expose port
 EXPOSE 7862

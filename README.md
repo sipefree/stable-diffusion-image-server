@@ -11,10 +11,10 @@ The recommended way to run the Stable Diffusion Image Server is via a Docker con
 You can start the Docker container with the following command:
 
 ```bash
-docker run -d --name stable_diffusion_shis -p 8000:8000 -v /path/to/your/content:/sdis-content -v /path/to/thumbnail-cache:/thumbs -e PORT=8000 -e WATCH_DELAY=15 -e NCPUS=4 -e CLEAN=false ghcr.io/sipefree/stable-diffusion-image-server:latest
+docker run -d --name stable_diffusion_shis -p 8000:8000 -v /path/to/your/content:/sdis-content -v /path/to/data:/data -e PORT=8000 -e WATCH_DELAY=15 -e NCPUS=4 -e CLEAN=false ghcr.io/sipefree/stable-diffusion-image-server:latest
 ```
 
-Replace `/path/to/your/content` and `/path/to/your/thumbs` with the actual paths to your directories on the host machine. You can also adjust the PORT, WATCH_DELAY, NCPUS, and CLEAN environment variables as needed.
+Replace `/path/to/your/content` and `/path/to/data` with the actual paths to your directories on the host machine, where the latter is the location where SDIS will save its database and generated content. You can also adjust the PORT, WATCH_DELAY, NCPUS, and CLEAN environment variables as needed.
 
 ### Docker Compose
 

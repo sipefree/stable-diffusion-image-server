@@ -26,8 +26,8 @@ attrs = "^23.1.0"
 cattrs = "^23.1.2"
 sanic = "^23.6.0"
 sanic-ext = "^23.6.0"
-mayim = "^1.1.0"
 xxhash = "^3.3.0"
+redis = "^5.0.0"
 
 
 [build-system]

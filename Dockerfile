@@ -7,13 +7,12 @@ ENV WATCH_DELAY 15
 ENV NCPUS 4
 ENV CLEAN false
 
-# Create directories for shis content and thumbnails
-RUN mkdir /sdis-content
-RUN mkdir /thumbs
+# Create directories for import content and output data
+RUN mkdir /sdis-content && mkdir -p /data/www && mkdir -p /data/redis
 
 # Define volumes
 VOLUME /sdis-content
-VOLUME /thumbs
+VOLUME /data
 
 # Set the working directory to /app
 WORKDIR /app
@@ -29,4 +28,4 @@ RUN python3 -m pip install -r requirements.txt
 RUN python3 -m pip install .
 
 # Run the command to start the server with environment variables
-CMD python3 -m sdis.server -p ${PORT} -w ${WATCH_DELAY} --ncpus ${NCPUS} --thumb-dir /thumbs -d /sdis-content $(if ${CLEAN}; then echo '--clean'; fi)
+CMD python3 -m sdis.server -p ${PORT} -w ${WATCH_DELAY} --ncpus ${NCPUS} --thumb-dir /data/www -d /sdis-content $(if ${CLEAN}; then echo '--clean'; fi)

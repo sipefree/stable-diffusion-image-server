@@ -6,7 +6,7 @@ from mayim import SQLiteExecutor, register, query
 
 @define
 class Album:
-    id: Optional[int]               = field(default=None)  # Autoincrement, so default is None
+    id: str                         = field()  # Autoincrement, so default is None
     name: str                       = field(validator=validators.min_length(1))
     original_path: Path             = field(converter=Path)
     generated_path: Path            = field(converter=Path)
