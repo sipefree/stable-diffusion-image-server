@@ -17,6 +17,7 @@ build/
 
 # Dev
 .content
+.devcontainer/devcontainer.env
 
 # Node
 node_modules/

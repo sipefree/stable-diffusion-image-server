@@ -9,7 +9,6 @@ from pathlib import Path
 
 from pathlib import Path
 from asyncinotify import Inotify, Mask
-import asyncio
 from typing import Callable, Optional
 
 async def watch_dirs_apply(dir_paths: list[Path], fn: Callable[[Path], None]) -> None:

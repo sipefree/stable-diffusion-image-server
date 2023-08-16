@@ -1,42 +1,64 @@
 from attrs import define, field, validators
-from typing import Optional, Any, Union
-from datetime import datetime
+from typing import Optional, Union, ClassVar
 from pathlib import Path
-from typing import Union
-from redis.asyncio import Redis
-from .service import DBService
+from .service import DBService, DBBase
+from pendulum.datetime import DateTime
+import pendulum
 import cattrs
+import re
 
 @define
 class Album:
     id: str                         = field()
     name: str                       = field(validator=validators.min_len(1))
-    original_path: Path             = field(converter=Path)
-    generated_path: Path            = field(converter=Path)
-    thumbnail_path: Path            = field(converter=Path)
-    creation_timestamp: datetime    = field()
+    original_path: Path             = field()
+    generated_path: Path            = field()
+    thumbnail_path: Optional[Path]  = field()
+    creation_timestamp: DateTime    = field()
+    
+    # ---------------------------------------------------------------------------- #
     
     @classmethod
-    def load_from_path(path: Path):
-        keys = AlbumKeys()
-        full_path = path.resolved()
-        id = keys.)
+    def load_from_path(cls, path: Path, basepath: Path, gen_basepath: Path) -> 'Album':
+        keys = AlbumKeys(basepath=basepath)
+        full_path = path.resolve()
+        return Album(
+            id = keys.album_key(full_path),
+            name = full_path.name,
+            original_path = full_path,
+            generated_path = gen_basepath / keys.pathstem(full_path),
+            thumbnail_path = None,
+            creation_timestamp = cls.creation_timestamp_from_path(full_path)
+        )
+        
+    _date_regex: ClassVar[re.Pattern[str]] = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
+    
+    @classmethod
+    def creation_timestamp_from_path(cls, path: Path) -> DateTime:
+        # if the path name matches 'YYYY-MM-DD', then use that as the creation timestamp
+        match = cls._date_regex.match(path.name)
+        if match != None:
+            year, month, day = match.groups()
+            return pendulum.local(year=int(year), month=int(month), day=int(day), hour=0, minute=0, second=0)
+        else:
+            return pendulum.from_timestamp(path.stat().st_ctime)
+        
         
         
 
 AlbumLike = Union[Album, Path, str]
 
-class AlbumKeys:
+class AlbumKeys(DBBase):
     """A utility class that provides methods for generating Redis keys for Albums."""
     
-    def resolve_stem(self, album: AlbumLike):
+    def resolve_stem(self, album: AlbumLike) -> str:
         """Returns the path stem for the given Album, Path, or str."""
         if isinstance(album, Album):
             return self.pathstem(album.original_path)
         elif isinstance(album, Path):
-            return self.pathstem(Path)
-        elif isinstance(album, str):
-            return str
+            return self.pathstem(album)
+        elif isinstance(album, str): # type: ignore
+            return album
         else:
             raise ValueError("Must pass either Album, Path, or str.")
         

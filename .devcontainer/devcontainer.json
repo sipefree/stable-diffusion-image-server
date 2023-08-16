@@ -2,14 +2,15 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
 	"name": "Alpine Dockerfile",
+	"initializeCommand": "sh ${localWorkspaceFolder}/.devcontainer/init-host.sh ${localWorkspaceFolder}",
 	"build": {
 		// Sets the run context to one level up instead of the .devcontainer folder.
 		"context": "${localWorkspaceFolder}",
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "Dockerfile"
 	},
+	"runArgs": [ "--env-file", "${localWorkspaceFolder}/.devcontainer/devcontainer.env" ],
 	"features": {},
-	"initializeCommand": "sh ${localWorkspaceFolder}/.devcontainer/init-host.sh",
 	"mounts": [
 		"source=devvolume-sdis-content,target=/sdis-content,type=volume"
 	],
@@ -29,7 +30,12 @@
 				"wholroyd.jinja",
 				"bradlc.vscode-tailwindcss",
 				"ms-vscode.makefile-tools",
-				"tamasfe.even-better-toml"
+				"tamasfe.even-better-toml",
+				"RobbOwen.synthwave-vscode",
+				"donjayamanne.python-extension-pack",
+				"ms-python.isort",
+				"hyesun.py-paste-indent",
+				"stackbreak.comment-divider"
 			],
 			"settings": {
 				"terminal.integrated.profiles.linux": { "zsh": { "path": "/bin/zsh" } },

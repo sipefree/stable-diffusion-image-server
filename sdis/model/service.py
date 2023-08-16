@@ -1,19 +1,17 @@
-import redis
-from sanic import Sanic
-from typing import NewType
+import redis.asyncio
+from sanic import DefaultSanic
+from typing import cast
 from pathlib import Path
+from pathlib import Path
+import cattrs
+
+from pendulum.datetime import DateTime
+from pendulum.parser import parse as pendulum_parse
 
 class DBBase:
     def __init__(self, basepath: Path):
         self.basepath: Path = basepath
-
-class DBService(DBBase):
-    
-    def __init__(self, conn: redis.asyncio.Redis, app: Sanic):
-        self.conn: redis.asyncio.Redis = conn
-        self.app: Sanic = app
-        super().__init__(basepath=Path(self.app.config.IMAGE_DIR))
-    
+        
     def pathstem(self, full_path: Path) -> str:
         """
         Returns the suffix of fullpath which is relative to the base path.
@@ -23,3 +21,20 @@ class DBService(DBBase):
         'txt2img-images/2023-06-01'
         """
         return str(full_path.relative_to(self.basepath))
+    
+    @classmethod
+    def make_converter(cls):
+        converter = cattrs.Converter()
+        converter.register_structure_hook(DateTime, lambda dt, _: pendulum_parse(dt))
+        converter.register_unstructure_hook(DateTime, lambda dt: dt.to_iso8601_string())
+        return converter
+
+
+class DBService(DBBase):
+    def __init__(self, conn: redis.asyncio.Redis, app: DefaultSanic):
+        super().__init__(basepath=Path(cast(str, app.config['IMAGE_DIR'])))
+        self.conn: redis.asyncio.Redis = conn
+        self.app: DefaultSanic = app
+        
+    
+    

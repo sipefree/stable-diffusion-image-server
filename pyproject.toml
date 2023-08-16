@@ -15,7 +15,7 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 pillow = "^10.0.0"
 jinja2 = "^3.1.2"
 tqdm = "^4.65.0"
@@ -28,6 +28,8 @@ sanic = "^23.6.0"
 sanic-ext = "^23.6.0"
 xxhash = "^3.3.0"
 redis = "^5.0.0"
+ipython = "^8.14.0"
+pendulum = "^2.1.2"
 
 
 [build-system]
@@ -37,3 +39,12 @@ build-backend = "poetry.core.masonry.api"
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
+include = ["sdis", "scripts"]
+exclude = [".venv/**"]
+useLibraryCodeForTypes = true
+strict = ["sdis"]
+typeCheckingMode = "strict"
+reportMissingImports = "information"
+reportMissingTypeStubs = "information"
+reportUnknownMemberType = "information"
+reportUnusedImport = "warning"

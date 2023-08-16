@@ -79,6 +79,9 @@ RUN mkdir /sdis-content && \
     chown redis:redis /data/redis && \
     chmod 0755 /data/redis
 
+# Declare timezone environment variable.
+ENV TZ="Etc/UTC"
+
 # Define volumes
 VOLUME /sdis-content
 VOLUME /data
