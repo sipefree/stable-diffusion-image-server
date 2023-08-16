@@ -5,36 +5,31 @@ from pathlib import Path
 from typing import Union
 from redis.asyncio import Redis
 from .service import DBService
+import cattrs
 
 @define
 class Album:
-    id: str                         = field()  # Autoincrement, so default is None
-    name: str                       = field(validator=validators.min_length(1))
+    id: str                         = field()
+    name: str                       = field(validator=validators.min_len(1))
     original_path: Path             = field(converter=Path)
     generated_path: Path            = field(converter=Path)
-    parent_id: Optional[int]        = field(default=None)  # Nullable, so default is None
     thumbnail_path: Path            = field(converter=Path)
     creation_timestamp: datetime    = field()
+    
+    @classmethod
+    def load_from_path(path: Path):
+        keys = AlbumKeys()
+        full_path = path.resolved()
+        id = keys.)
+        
+        
 
+AlbumLike = Union[Album, Path, str]
 
-class AlbumService(DBService):
-    """A database service object for Albums."""
+class AlbumKeys:
+    """A utility class that provides methods for generating Redis keys for Albums."""
     
-    
-    
-    def key_for_stem(self, pathstem: str) -> str:
-        """Returns the Redis key for the Album with the given path stem."""
-        return f"album:{pathstem}"
-    
-    def key_for_album_path(self, full_path: Path) -> str:
-        """Returns the Redis key for the Album with the given full path."""
-        return self.key_for_stem(self.pathstem(full_path))
-    
-    def key_for_album(self, album: Album) -> str:
-        """Returns the Redis key for the given Album."""
-        return self.key_for_album_path(album.original_path)
-    
-    def resolve_stem(self, album: Union[Album, Path, str]):
+    def resolve_stem(self, album: AlbumLike):
         """Returns the path stem for the given Album, Path, or str."""
         if isinstance(album, Album):
             return self.pathstem(album.original_path)
@@ -44,26 +39,37 @@ class AlbumService(DBService):
             return str
         else:
             raise ValueError("Must pass either Album, Path, or str.")
+        
+    # --------------------------------- Redis Keys --------------------------------- #
+        
+    def album_key(self, album: AlbumLike) -> str:
+        """Returns the Redis key for the Album."""
+        return f"album:{self.resolve_stem(album)}"
+    
+    def subalbums_key(self, album: AlbumLike) -> str:
+        """Returns the Redis key for the Album's subalbum set."""
+        return f"album_subalbums:{self.resolve_stem(album)}"
+    
+    def images_key(self, album: AlbumLike) -> str:
+        """Returns the Redis key for the Album's image set."""
+        return f"album_images:{self.resolve_stem(album)}"
+
+class AlbumService(DBService, AlbumKeys):
+    """A database service object for Albums."""
+    
+    # ---------------------------------- Queries --------------------------------- #
+    
+    async def get_album(self, album: AlbumLike) -> Optional[Album]:
+        """Returns the Album object for the given Album, Path, or str."""
+        res = await self.conn.json().get(self.album_key(album))
     
     
-    # --------------------------------- Patterns --------------------------------- #
-    
-    @property
-    def all_albums_key_pattern(self) -> str:
-        """The Redis key pattern for all albums."""
-        return 'album:*'
-    
-    def subalbums_of_album_pattern(self, album: Path) -> str:
-        """The Redis key pattern for all subalbums of the given album."""
-        return f"album:{relpath}/*"
-    
-    def subalbums_of_
     
     
     
     
         
-
+"""
 @register
 class SelectAlbums(SQLiteExecutor):
     @query("SELECT * FROM albums ORDER BY $order_by LIMIT $limit OFFSET $offset")
@@ -87,3 +93,4 @@ class InsertAlbum(SQLiteExecutor):
     @query("INSERT INTO albums (name, original_path, generated_path, parent_id, thumbnail_path, creation_timestamp) VALUES ($name, $original_path, $generated_path, $parent_id, $thumbnail_path, $creation_timestamp)")
     async def insert_album(self, name: str, original_path: Path, generated_path: Path, parent_id: Optional[int], thumbnail_path: Path, creation_timestamp: datetime) -> int:
         ...
+"""

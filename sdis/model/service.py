@@ -1,18 +1,18 @@
-from redis.asyncio import Redis
+import redis
 from sanic import Sanic
 from typing import NewType
 from pathlib import Path
 
-class DBService:
+class DBBase:
+    def __init__(self, basepath: Path):
+        self.basepath: Path = basepath
+
+class DBService(DBBase):
     
-    def __init__(self, conn: Redis, app: Sanic):
-        self.conn = conn
-        self.app = app
-        
-    @property
-    def basepath(self) -> Path:
-        """The base path of all the content files."""
-        return Path(self.app.config.IMAGE_DIR)
+    def __init__(self, conn: redis.asyncio.Redis, app: Sanic):
+        self.conn: redis.asyncio.Redis = conn
+        self.app: Sanic = app
+        super().__init__(basepath=Path(self.app.config.IMAGE_DIR))
     
     def pathstem(self, full_path: Path) -> str:
         """
