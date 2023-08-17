@@ -21,7 +21,7 @@ class DBBase:
         Path('/sdis-content/txt2img-images/2023-06-01'), then it returns
         'txt2img-images/2023-06-01'
         """
-        return str(full_path.relative_to(self.basepath))
+        return self.quotepath(str(full_path.relative_to(self.basepath)))
     
     def quotepath(self, path: Union[Path, str]) -> str:
         """Returns the path, with special characters escaped."""

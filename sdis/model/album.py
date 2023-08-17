@@ -59,11 +59,11 @@ class AlbumKeys(DBBase):
         elif isinstance(album, str): # type: ignore
             match = AlbumKeys._album_key_regex.match(album)
             if match:
-                return self.unquotepath(match.group(1))
+                return match.group(1)
             elif album.startswith("/"):
                 return self.resolve_stem(Path(album))
             else:
-                return self.unquotepath(album)
+                return self.quotepath(self.unquotepath(album))
         else:
             raise ValueError("Must pass either Album, Path, or str.")
         
@@ -71,7 +71,6 @@ class AlbumKeys(DBBase):
         
     def album_key(self, album: AlbumLike) -> str:
         """Returns the Redis key for the Album."""
-        stem = self.quotepath(self.resolve_stem(album))
         return f"album:{self.resolve_stem(album)}"
     
     def subalbums_key(self, album: AlbumLike) -> str:
