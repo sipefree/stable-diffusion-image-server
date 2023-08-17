@@ -1,6 +1,7 @@
 from redis.asyncio import client, from_url
-from sanic import Sanic, Request
+from sanic import DefaultSanic, Request
 from sanic.log import logger
+
 
 
 
@@ -10,7 +11,7 @@ class RedisManager:
         self.conn = redis
         
     @classmethod
-    async def connect_app(cls, app: Sanic, redis_url: str):
+    async def connect_app(cls, app: DefaultSanic, redis_url: str):
         if not redis_url:
             raise ValueError("You must specify a redis_url for RedisManager.")
         logger.info('[RedisManager] connecting')
@@ -18,7 +19,7 @@ class RedisManager:
         app.ctx.redis = cls(conn)
         
         @app.listener('after_server_stop')
-        async def close_redis(app: Sanic):
+        async def close_redis(app: DefaultSanic):
             logger.info('[RedisManager] closing')
             await app.ctx.redis.conn.close()
             
@@ -38,7 +39,7 @@ class RedisManager:
         
         # ---------------------------------------------------------------------------- #
         
-        
+
         
         
         

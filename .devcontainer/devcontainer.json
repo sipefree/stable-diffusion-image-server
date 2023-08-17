@@ -35,7 +35,8 @@
 				"donjayamanne.python-extension-pack",
 				"ms-python.isort",
 				"hyesun.py-paste-indent",
-				"stackbreak.comment-divider"
+				"stackbreak.comment-divider",
+				"ms-toolsai.jupyter"
 			],
 			"settings": {
 				"terminal.integrated.profiles.linux": { "zsh": { "path": "/bin/zsh" } },

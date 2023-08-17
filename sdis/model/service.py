@@ -1,9 +1,10 @@
 import redis.asyncio
 from sanic import DefaultSanic
-from typing import cast
+from typing import cast, Union
 from pathlib import Path
 from pathlib import Path
 import cattrs
+from urllib.parse import quote, unquote
 
 from pendulum.datetime import DateTime
 from pendulum.parser import parse as pendulum_parse
@@ -22,6 +23,14 @@ class DBBase:
         """
         return str(full_path.relative_to(self.basepath))
     
+    def quotepath(self, path: Union[Path, str]) -> str:
+        """Returns the path, with special characters escaped."""
+        return quote(str(path), safe=" /")
+    
+    def unquotepath(self, path: str) -> str:
+        """Returns the path, with special characters unescaped."""
+        return unquote(path)
+    
     @classmethod
     def make_converter(cls):
         converter = cattrs.Converter()
@@ -35,6 +44,7 @@ class DBService(DBBase):
         super().__init__(basepath=Path(cast(str, app.config['IMAGE_DIR'])))
         self.conn: redis.asyncio.Redis = conn
         self.app: DefaultSanic = app
+        app.ext.dep
         
     
     

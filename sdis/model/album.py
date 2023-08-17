@@ -1,55 +1,54 @@
-from attrs import define, field, validators
-from typing import Optional, Union, ClassVar
-from pathlib import Path
-from .service import DBService, DBBase
-from pendulum.datetime import DateTime
-import pendulum
-import cattrs
 import re
+from collections import deque
+from pathlib import Path
+from typing import ClassVar, Optional, Union
+
+import pendulum
+from attrs import define, field, validators
+from pendulum.datetime import DateTime
+
+from .image import Image, path_is_image
+from .service import DBBase, DBService
+
+# ---------------------------------------------------------------------------- #
+#                                  Album Class                                 #
+# ---------------------------------------------------------------------------- #
 
 @define
 class Album:
     id: str                         = field()
     name: str                       = field(validator=validators.min_len(1))
     original_path: Path             = field()
-    generated_path: Path            = field()
+    generated_path: Optional[Path]  = field()
     thumbnail_path: Optional[Path]  = field()
-    creation_timestamp: DateTime    = field()
+    created: DateTime               = field()
+
+
+# ---------------------------------------------------------------------------- #
+#                               Album Tree Class                               #
+# ---------------------------------------------------------------------------- #
+
+@define
+class AlbumTree:
+    album: Album                    = field()
+    subalbums: list['AlbumTree']    = field(factory=list)
+    images: list[Image]             = field(factory=list)
+    imageCountEstimate: int         = field(default=0)
+    subCountEstimate: int           = field(default=0)
+    parent: 'AlbumTree'             = field(default=None)
     
-    # ---------------------------------------------------------------------------- #
     
-    @classmethod
-    def load_from_path(cls, path: Path, basepath: Path, gen_basepath: Path) -> 'Album':
-        keys = AlbumKeys(basepath=basepath)
-        full_path = path.resolve()
-        return Album(
-            id = keys.album_key(full_path),
-            name = full_path.name,
-            original_path = full_path,
-            generated_path = gen_basepath / keys.pathstem(full_path),
-            thumbnail_path = None,
-            creation_timestamp = cls.creation_timestamp_from_path(full_path)
-        )
-        
-    _date_regex: ClassVar[re.Pattern[str]] = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
-    
-    @classmethod
-    def creation_timestamp_from_path(cls, path: Path) -> DateTime:
-        # if the path name matches 'YYYY-MM-DD', then use that as the creation timestamp
-        match = cls._date_regex.match(path.name)
-        if match != None:
-            year, month, day = match.groups()
-            return pendulum.local(year=int(year), month=int(month), day=int(day), hour=0, minute=0, second=0)
-        else:
-            return pendulum.from_timestamp(path.stat().st_ctime)
-        
-        
+# ---------------------------------------------------------------------------- #
+#                               Album Keys Class                               #
+# ---------------------------------------------------------------------------- #
         
 
 AlbumLike = Union[Album, Path, str]
 
 class AlbumKeys(DBBase):
     """A utility class that provides methods for generating Redis keys for Albums."""
+    
+    _album_key_regex = re.compile(r"album:([^:]+)")
     
     def resolve_stem(self, album: AlbumLike) -> str:
         """Returns the path stem for the given Album, Path, or str."""
@@ -58,7 +57,13 @@ class AlbumKeys(DBBase):
         elif isinstance(album, Path):
             return self.pathstem(album)
         elif isinstance(album, str): # type: ignore
-            return album
+            match = AlbumKeys._album_key_regex.match(album)
+            if match:
+                return self.unquotepath(match.group(1))
+            elif album.startswith("/"):
+                return self.resolve_stem(Path(album))
+            else:
+                return self.unquotepath(album)
         else:
             raise ValueError("Must pass either Album, Path, or str.")
         
@@ -66,6 +71,7 @@ class AlbumKeys(DBBase):
         
     def album_key(self, album: AlbumLike) -> str:
         """Returns the Redis key for the Album."""
+        stem = self.quotepath(self.resolve_stem(album))
         return f"album:{self.resolve_stem(album)}"
     
     def subalbums_key(self, album: AlbumLike) -> str:
@@ -76,7 +82,66 @@ class AlbumKeys(DBBase):
         """Returns the Redis key for the Album's image set."""
         return f"album_images:{self.resolve_stem(album)}"
 
-class AlbumService(DBService, AlbumKeys):
+
+# ---------------------------------------------------------------------------- #
+#                              Album Import Class                              #
+# ---------------------------------------------------------------------------- #
+
+class AlbumImport(AlbumKeys):
+    
+    _date_regex: ClassVar[re.Pattern[str]] = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
+    
+    def load_from_path(self, path: Path) -> Album:
+        full_path = path.resolve()
+        return Album(id = self.album_key(full_path),
+                     name = full_path.name,
+                     original_path = full_path,
+                     generated_path = None,
+                     thumbnail_path = None,
+                     created = self.creation_timestamp_from_path(full_path))
+        
+    def build_album_tree(self) -> AlbumTree:
+        # Starting point
+        root_album = self.load_from_path(self.basepath)
+        root_tree = AlbumTree(album=root_album, subalbums=[], images=[])
+        
+        # Use a queue to perform breadth-first search
+        queue = deque([(self.basepath, root_tree)])
+        
+        while queue:
+            current_path, current_tree = queue.popleft()
+            
+            # Iterate over all items in the current directory
+            for item in current_path.iterdir():
+                if item.is_dir():
+                    # If it's a directory, create an album and add it to the subalbums
+                    sub_album = self.load_from_path(item)
+                    sub_tree = AlbumTree(album=sub_album, subalbums=[], images=[], parent=current_tree)
+                    current_tree.subalbums.append(sub_tree)
+                    queue.append((item, sub_tree))
+                elif item.is_file() and path_is_image(item):
+                    current_tree.imageCountEstimate += 1
+
+        return root_tree
+    
+    
+                     
+    
+    def creation_timestamp_from_path(self, path: Path) -> DateTime:
+        # if the path name matches 'YYYY-MM-DD', then use that as the creation timestamp
+        match = AlbumImport._date_regex.match(path.name)
+        if match != None:
+            year, month, day = match.groups()
+            return pendulum.local(year=int(year), month=int(month), day=int(day), hour=0, minute=0, second=0)
+        else:
+            return pendulum.from_timestamp(path.stat().st_ctime)
+    
+
+# ---------------------------------------------------------------------------- #
+#                              Album Service Class                             #
+# ---------------------------------------------------------------------------- #
+
+class AlbumService(DBService, AlbumImport, AlbumKeys):
     """A database service object for Albums."""
     
     # ---------------------------------- Queries --------------------------------- #

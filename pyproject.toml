@@ -28,8 +28,14 @@ sanic = "^23.6.0"
 sanic-ext = "^23.6.0"
 xxhash = "^3.3.0"
 redis = "^5.0.0"
-ipython = "^8.14.0"
 pendulum = "^2.1.2"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.14.0"
+ipykernel = "^6.25.1"
 
 
 [build-system]
