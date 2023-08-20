@@ -5,6 +5,7 @@ import pendulum
 import json
 from pathlib import Path
 from .service import DBBase, DBService
+import re
 
 ParamType = Union[str, int, float]
 ParamDict = dict[str, ParamType]
@@ -49,7 +50,7 @@ class ImageKeys(DBBase):
         elif isinstance(image, Path):
             return (self.pathstem(image), image.name)
         elif isinstance(image, str): # type: ignore
-            
+            pass
         else:
             raise ValueError("Must pass either Image, Path, or str.")
     
@@ -71,7 +72,7 @@ class ImageKeys(DBBase):
         return f"image:{self.resolve_stem(image)}:{self.resolve_filename(image)}"
     
     def album_key(self, image: ImageLike) -> str:
-
+        pass
 # ---------------------------------------------------------------------------- #
 #                              Image Service Class                             #
 # ---------------------------------------------------------------------------- #

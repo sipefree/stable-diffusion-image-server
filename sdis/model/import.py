@@ -1,7 +1,9 @@
 from pathlib import Path
+
+from .albums.album_service import AlbumService
 from .service import DBBase, DBService
 from .image import Image, ImageService
-from .album import Album, AlbumService
+from .albums.album import Album
 
 class ImportService(DBService):
     

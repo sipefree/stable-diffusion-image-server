@@ -36,7 +36,15 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.14.0"
 ipykernel = "^6.25.1"
+pytest = "^7.4.0"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-rf"]
+filterwarnings = [
+    "ignore::DeprecationWarning:websockets.*:",
+    "ignore::DeprecationWarning:tracerite.*:"
+]
 
 [build-system]
 requires = ["poetry-core"]
