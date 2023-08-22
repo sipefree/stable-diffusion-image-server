@@ -1,13 +1,17 @@
-import redis.asyncio
-from sanic import DefaultSanic
-from typing import cast, Union
 from pathlib import Path
-from pathlib import Path
-import cattrs
+from typing import Awaitable, TypeVar, Union, cast
 from urllib.parse import quote, unquote
 
+import cattrs
+import redis.asyncio
 from pendulum.datetime import DateTime
 from pendulum.parser import parse as pendulum_parse
+from sanic import DefaultSanic
+
+T = TypeVar('T')
+
+def cast_async(value: T) -> Awaitable[T]:
+    return cast(Awaitable[T], value)
 
 class DBBase:
     def __init__(self, basepath: Path):
@@ -46,5 +50,4 @@ class DBService(DBBase):
         self.app: DefaultSanic = app
         app.ext.dep
         
-    
     
