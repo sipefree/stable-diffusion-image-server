@@ -3,7 +3,6 @@ from typing import Optional, Union
 
 from attrs import define, field, validators
 from pendulum.datetime import DateTime
-from model.albums.import from model.albums.import 
 
 
 # ---------------------------------------------------------------------------- #

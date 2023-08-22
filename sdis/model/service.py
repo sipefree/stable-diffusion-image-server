@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Awaitable, TypeVar, Union, cast
+from typing import Awaitable, TypeVar, Union, cast, Optional, Type
 from urllib.parse import quote, unquote
 
 import cattrs
@@ -7,6 +7,8 @@ import redis.asyncio
 from pendulum.datetime import DateTime
 from pendulum.parser import parse as pendulum_parse
 from sanic import DefaultSanic
+
+from .async_json import AsyncJSONCommands, JsonType
 
 T = TypeVar('T')
 
@@ -44,10 +46,27 @@ class DBBase:
 
 
 class DBService(DBBase):
+    """Base class for services that use redis."""
+    
     def __init__(self, conn: redis.asyncio.Redis, app: DefaultSanic):
         super().__init__(basepath=Path(cast(str, app.config['IMAGE_DIR'])))
         self.conn: redis.asyncio.Redis = conn
         self.app: DefaultSanic = app
-        app.ext.dep
-        
+        self.json: AsyncJSONCommands = cast(AsyncJSONCommands, self.conn.json())
+        self.converter = self.__class__.make_converter()
+        self.configure_converter(self.converter)
     
+    def configure_converter(self, converter: cattrs.Converter):
+        """Override this method to configure the converter."""
+        pass
+    
+    def structure_one(self, json_result: list[JsonType], cls: Type[T]) -> Optional[T]:
+        """Converts a single JSON result to an object."""
+        if len(json_result) == 0:
+            return None
+        return self.converter.structure(json_result[0], cls)
+    
+    def structure_many(self, json_result: list[JsonType], cls: Type[T]) -> list[T]:
+        """Converts a list of JSON results to a list of objects."""
+        return [self.converter.structure(item, cls) for item in json_result]
+        

@@ -1,5 +1,5 @@
-from model.albums.album import Album, AlbumLike
-from model.service import DBBase
+from .album import Album, AlbumLike
+from ..service import DBBase
 
 import re
 from pathlib import Path

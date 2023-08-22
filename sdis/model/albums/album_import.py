@@ -8,9 +8,9 @@ import re
 from collections import deque
 from pathlib import Path
 from typing import ClassVar
-from model.albums.album import Album
-from model.albums.album_keys import AlbumKeys
-from model.image import Image, path_is_image
+from .album import Album
+from .album_keys import AlbumKeys
+from sdis.model.image import Image, path_is_image
 
 
 from attrs import define, field
