@@ -1,30 +1,48 @@
-# ---------------------------------------------------------------------------- #
-#                               Album Tree Class                               #
-# ---------------------------------------------------------------------------- #
-
 import pendulum
 from pendulum.datetime import DateTime
 import re
 from collections import deque
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional
 from .album import Album
 from .album_keys import AlbumKeys
-from sdis.model.image import Image, path_is_image
+from ..images import Image, path_is_image
 
 
 from attrs import define, field
 
 
 @define
+class AlbumTreeNode:
+    album: Album                        = field()
+    subalbums: list['AlbumTreeNode']    = field(factory=list)
+    images: list[Image]                 = field(factory=list)
+    parent: Optional['AlbumTreeNode']   = field(default=None)
+    level: int                          = field(init=False)
+    
+    image_paths: list[Path]             = field(factory=list)
+    deep_image_count: int               = field(default=0)
+    
+    def __attrs_post_init__(self):
+        self.level = self.parent.level + 1 if self.parent != None else 0
+    
+@define
 class AlbumTree:
-    album: Album                    = field()
-    subalbums: list['AlbumTree']    = field(factory=list)
-    images: list[Image]             = field(factory=list)
-    imageCountEstimate: int         = field(default=0)
-    subCountEstimate: int           = field(default=0)
-    parent: 'AlbumTree'             = field(default=None)
-
+    root: AlbumTreeNode                     = field()
+    all_albums: list[AlbumTreeNode]         = field()
+    albums_by_key: dict[str, AlbumTreeNode] = field(init=False)
+    
+    def __attrs_post_init__(self):
+        self.albums_by_key = {album.album.id: album for album in self.all_albums}
+        self._deep_count_images()
+    
+    def _deep_count_images(self):
+        # non-recursive count of images in each album.
+        # starts at the bottom of the tree and works its way up.
+        sorted_trees = sorted(self.all_albums, key=lambda tree: tree.level, reverse=True)
+        for tree in sorted_trees:
+            child_image_count = sum(subtree.deep_image_count for subtree in tree.subalbums)
+            tree.deep_image_count = len(tree.image_paths) + child_image_count
 
 
 
@@ -48,7 +66,9 @@ class AlbumImport(AlbumKeys):
     def build_album_tree(self) -> AlbumTree:
         # Starting point
         root_album = self.load_from_path(self.basepath)
-        root_tree = AlbumTree(album=root_album, subalbums=[], images=[])
+        root_tree = AlbumTreeNode(album=root_album)
+        
+        all_album_trees: list[AlbumTreeNode]  = [root_tree]
 
         # Use a queue to perform breadth-first search
         queue = deque([(self.basepath, root_tree)])
@@ -61,13 +81,17 @@ class AlbumImport(AlbumKeys):
                 if item.is_dir():
                     # If it's a directory, create an album and add it to the subalbums
                     sub_album = self.load_from_path(item)
-                    sub_tree = AlbumTree(album=sub_album, subalbums=[], images=[], parent=current_tree)
+                    sub_tree = AlbumTreeNode(album=sub_album, parent=current_tree)
                     current_tree.subalbums.append(sub_tree)
                     queue.append((item, sub_tree))
+                    all_album_trees.append(sub_tree)
                 elif item.is_file() and path_is_image(item):
-                    current_tree.imageCountEstimate += 1
+                    current_tree.image_paths.append(item)
 
-        return root_tree
+        return AlbumTree(root_tree, all_album_trees)
+    
+    
+    
 
 
 

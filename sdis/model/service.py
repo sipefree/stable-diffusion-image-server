@@ -1,3 +1,5 @@
+# pyright: reportUnknownMemberType=false
+
 from pathlib import Path
 from typing import Awaitable, TypeVar, Union, cast, Optional, Type
 from urllib.parse import quote, unquote
@@ -8,7 +10,7 @@ from pendulum.datetime import DateTime
 from pendulum.parser import parse as pendulum_parse
 from sanic import DefaultSanic
 
-from .async_json import AsyncJSONCommands, JsonType
+from .async_overlay import AsyncJSONCommands, JsonType
 
 T = TypeVar('T')
 
@@ -69,4 +71,14 @@ class DBService(DBBase):
     def structure_many(self, json_result: list[JsonType], cls: Type[T]) -> list[T]:
         """Converts a list of JSON results to a list of objects."""
         return [self.converter.structure(item, cls) for item in json_result]
+    
+    async def get_object(self, obj_type: Type[T], key: str) -> Optional[T]:
+        json = await self.json.get(key, '$')
+        return self.structure_one(json, obj_type)
+    
+    async def get_objects_from_key_set(self, obj_type: Type[T], keyset_key: str) -> list[T]:
+        keys_b = await cast(Awaitable[set[bytes]], self.conn.smembers(keyset_key))
+        keys = [key.decode('utf-8') for key in keys_b]
+        objects_json = await self.json.mget(keys, '$')
+        return self.structure_many(objects_json, obj_type)
         
